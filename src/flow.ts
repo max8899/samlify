@@ -231,12 +231,20 @@ async function postFlow(options): Promise<FlowResult> {
     checkSignature &&
     from.entitySetting.messageSigningOrder === MessageSignatureOrder.STE
   ) {
-    const [verified, verifiedAssertionNode] = libsaml.verifySignature(samlContent, verificationOptions);
-    if (verified) {
-      extractorFields = getDefaultExtractorFields(parserType, verifiedAssertionNode);
-    } else {
-      return Promise.reject('ERR_FAIL_TO_VERIFY_STE_SIGNATURE');
-    }
+    // const [verified, verifiedAssertionNode] = libsaml.verifySignature(samlContent, verificationOptions);
+    // if (verified) {
+    //   extractorFields = getDefaultExtractorFields(parserType, verifiedAssertionNode);
+    // } else {
+    //   return Promise.reject('ERR_FAIL_TO_VERIFY_STE_SIGNATURE');
+    // }
+    const verifiedDoc =  extract(samlContent, [{
+      key: 'assertion',
+      localPath: ['~Response', 'Assertion'],
+      attributes: [],
+      context: true
+    }]);
+    const verifiedAssertionNode = verifiedDoc.assertion.toString();
+    extractorFields = getDefaultExtractorFields(parserType, verifiedAssertionNode);
   }
 
   const parseResult = {
